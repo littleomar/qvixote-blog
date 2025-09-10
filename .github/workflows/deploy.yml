@@ -25,12 +25,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build with Quartz
-        run: echo $GITHUB_WORKSPACE && npx quartz build --directory=$GITHUB_WORKSPACE
+        run: npx quartz build --directory=$GITHUB_WORKSPACE
 
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: public/
+          path: /app/quartz/public/
 
   deploy:
     needs: build
