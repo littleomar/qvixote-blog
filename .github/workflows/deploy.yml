@@ -17,12 +17,12 @@ jobs:
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+    defaults:
+      run:
+        working-directory: /app/vault
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Install dependencies (if needed)
-        run: npm ci || echo "No package.json or dependencies to install"
 
       - name: Build with Quartz
         run: npx quartz build --directory=/app/vault
