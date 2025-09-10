@@ -19,13 +19,13 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     defaults:
       run:
-        working-directory: /app/vault
+        working-directory: /app/quartz
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Build with Quartz
-        run: npx quartz build --directory=/app/vault
+        run: npx quartz build --directory=/github/workspace
 
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
