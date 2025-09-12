@@ -72,12 +72,7 @@ export interface Subscriber extends DebuggerOptions {
 	- **指针区域** 有`sub` `dep`两个链上的前后指针 `prevDep` `nextDep` `prevSub` `nextSub`
 ![image](https://origin.picgo.net/2025/09/04/image3b595cba1bfd7409.png)
 #### 判断是否为是同一个`LinkNode`
-假如在一个`LinkNode`节点中`sub`指向的subscriber和`dep`指向的dependence都一致，则此`LinkNode`确定为同一个，所以可以计算出整个项目中的`LinkNode`总数
-$$
-
-\sum_{i, j} (\text{effect}_i \times \text{reactive}_j)
-
-$$
+假如在一个`LinkNode`节点中`sub`指向的subscriber和`dep`指向的dependence都一致，则此`LinkNode`确定为同一个
 #### `LinkNode`的创建
 在vue中关于`Link`的创建出现在响应式数据的**依赖收集**中，这也是在整个项目中唯一一处创建`LinkNode` 的地方
 ```typescript

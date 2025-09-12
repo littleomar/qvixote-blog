@@ -233,11 +233,147 @@ export function baseCompile(
   // ...
 }
 ```
-调用transform的时候会传入参数，其中参数属性主要有两个`nodeTransforms`和`directiveTransforms`主要是对`template`模板字符串中的*节点* 和*指令* 的处理，其他属性则是一些工具函数
-- `nodeTransforms`加工AST中的节点的方法，对照着`VNode`中的`PatchFlags`，判断出节点对应哪种`PatchFlags`，并在AST中赋予对应属性
-- `directiveTransforms` 处理vue的相关指令的转换方法
+调用transform的时候会传入参数，其中参数属性主要有两个`nodeTransforms`和`directiveTransforms`主要是对`template`模板字符串中的*节点* 和*指令* 的处理，其他属性则是一些工具函数，以下是它们的定义和解释
+```ts
+// There are two types of transforms:
+//
+// - NodeTransform:
+//   Transforms that operate directly on a ChildNode. NodeTransforms may mutate,
+//   replace or remove the node being processed.
+export type NodeTransform = (
+  node: RootNode | TemplateChildNode,
+  context: TransformContext,
+) => void | (() => void) | (() => void)[]
+
+// - DirectiveTransform:
+//   Transforms that handles a single directive attribute on an element.
+//   It translates the raw directive into actual props for the VNode.
+export type DirectiveTransform = (
+  dir: DirectiveNode,
+  node: ElementNode,
+  context: TransformContext,
+  // a platform specific compiler can import the base transform and augment
+  // it by passing in this optional argument.
+  augmentor?: (ret: DirectiveTransformResult) => DirectiveTransformResult,
+) => DirectiveTransformResult
+```
+- `nodeTransforms`加工AST中的节点的方法，对照着`VNode`中的`PatchFlags`，判断出节点对应哪种`PatchFlags`，比如是需要`createTextVNode`、`createCommentVNode`、`createElementVNode`等都是在这个过程加工的，从宏观角度看这个过程就是处理dom的
+```ts
+// /core/packages/compiler-core/src/transforms/transformText.ts
+// 例如在compiler模块的transforms转换方法下transformText的作用就是将判断为TEXT的节点组成带有`createTextVNode`的函数
+
+// Merge adjacent text nodes and expressions into a single expression
+// e.g. <div>abc {{ d }} {{ e }}</div> should have a single expression node as child.
+export const transformText: NodeTransform = (node, context) => {
+  if (
+    node.type === NodeTypes.ROOT ||
+    node.type === NodeTypes.ELEMENT ||
+    node.type === NodeTypes.FOR ||
+    node.type === NodeTypes.IF_BRANCH
+  ) {
+    // perform the transform on node exit so that all expressions have already
+    // been processed.
+    return () => {
+      const children = node.children
+      let currentContainer: CompoundExpressionNode | undefined = undefined
+      let hasText = false
+
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i]
+        if (isText(child)) {
+          hasText = true
+          for (let j = i + 1; j < children.length; j++) {
+            const next = children[j]
+            if (isText(next)) {
+              if (!currentContainer) {
+                currentContainer = children[i] = createCompoundExpression(
+                  [child],
+                  child.loc,
+                )
+              }
+              // merge adjacent text node into current
+              currentContainer.children.push(` + `, next)
+              children.splice(j, 1)
+              j--
+            } else {
+              currentContainer = undefined
+              break
+            }
+          }
+        }
+      }
+
+      if (
+        !hasText ||
+        // if this is a plain element with a single text child, leave it
+        // as-is since the runtime has dedicated fast path for this by directly
+        // setting textContent of the element.
+        // for component root it's always normalized anyway.
+        (children.length === 1 &&
+          (node.type === NodeTypes.ROOT ||
+            (node.type === NodeTypes.ELEMENT &&
+              node.tagType === ElementTypes.ELEMENT &&
+              // #3756
+              // custom directives can potentially add DOM elements arbitrarily,
+              // we need to avoid setting textContent of the element at runtime
+              // to avoid accidentally overwriting the DOM elements added
+              // by the user through custom directives.
+              !node.props.find(
+                p =>
+                  p.type === NodeTypes.DIRECTIVE &&
+                  !context.directiveTransforms[p.name],
+              ) &&
+              // in compat mode, <template> tags with no special directives
+              // will be rendered as a fragment so its children must be
+              // converted into vnodes.
+              !(__COMPAT__ && node.tag === 'template'))))
+      ) {
+        return
+      }
+
+      // pre-convert text nodes into createTextVNode(text) calls to avoid
+      // runtime normalization.
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i]
+        if (isText(child) || child.type === NodeTypes.COMPOUND_EXPRESSION) {
+          const callArgs: CallExpression['arguments'] = []
+          // createTextVNode defaults to single whitespace, so if it is a
+          // single space the code could be an empty call to save bytes.
+          if (child.type !== NodeTypes.TEXT || child.content !== ' ') {
+            callArgs.push(child)
+          }
+          // mark dynamic text with flag so it gets patched inside a block
+          if (
+            !context.ssr &&
+            getConstantType(child, context) === ConstantTypes.NOT_CONSTANT
+          ) {
+            callArgs.push(
+              PatchFlags.TEXT +
+                (__DEV__ ? ` /* ${PatchFlagNames[PatchFlags.TEXT]} */` : ``),
+            )
+          }
+          children[i] = {
+            type: NodeTypes.TEXT_CALL,
+            content: child,
+            loc: child.loc,
+            codegenNode: createCallExpression(  // 此时会转换为createTextVNode字符串
+              context.helper(CREATE_TEXT), // 这个helper就是关系映射 'CREATE_TEXT -> createTextVNode'
+              callArgs,
+            ),
+          }
+        }
+      }
+    }
+  }
+}
+```
+- `directiveTransforms` 处理vue的相关指令的转换方法将原生的指令转换为实际的VNode属性，比如将for循环转换为`list.map`函数，宏观角度看这个过程是处理js的
 ##### generate
+根据已经生成的完整的AST抽象语法树，转换为渲染函数字符串
+
 #### `@vitejs/plugin-vue`插件处理
 这个插件是依赖vue编译模块的，会调用`vue/compiler-sfc`其实执行过程和`template`执行很类似，不过执行时机不同，插件是在静态资源构建时运行的，`template`模板则是在`runtime`时候执行
 #### `@vitejs/plugin-vue-jsx`插件处理
 这个插件就与前两者不同了，因为处理的文件是`jsx`或者`tsx`，而他们又直接被`babel`支持所以此插件的本质是调用`babel` + `babel-plugin`。此插件并不依赖vue中的编译模块，而是把和vue编译相关的逻辑转移到了`babel-plugin`之中
+
+![image](https://origin.picgo.net/2025/09/11/imagef67a55dc820b0190.png)

@@ -9,7 +9,7 @@
 - **空闲时**：尤其在进行网络请求等异步操作时，CPU占用量比较低，会进行GC避免对主线程的性能造成影响。
 
 #### 现代执行环境中GC的优化机制
-#### 分代回收 Generational GC
+##### 分代回收 Generational GC
 在**V8**引擎中实现，原理：[代际假说(Generational Hypothesis)](https://v8.dev/blog/trash-talk)。变量划分为两个部分，新生代和旧生代，新生代又把内存划分为两个半区，在进行垃圾回收时会将存活的变量复制到另一个半区，未被引用的变量直接丢弃，经过两次复制依然存活的变量则会提升到旧生代中，旧生代中的变量则会采用Mark-Sweep的机制进行GC。
 ![image](https://origin.picgo.net/2025/09/01/image54230cfaa46d89b9.png)
 ##### 三色标记
