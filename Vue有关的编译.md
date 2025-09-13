@@ -374,6 +374,13 @@ export const transformText: NodeTransform = (node, context) => {
 #### `@vitejs/plugin-vue`插件处理
 这个插件是依赖vue编译模块的，会调用`vue/compiler-sfc`其实执行过程和`template`执行很类似，不过执行时机不同，插件是在静态资源构建时运行的，`template`模板则是在`runtime`时候执行
 #### `@vitejs/plugin-vue-jsx`插件处理
-这个插件就与前两者不同了，因为处理的文件是`jsx`或者`tsx`，而他们又直接被`babel`支持所以此插件的本质是调用`babel` + `babel-plugin`。此插件并不依赖vue中的编译模块，而是把和vue编译相关的逻辑转移到了`babel-plugin`之中
-
+这个插件就与前两者不同了，因为处理的文件是`jsx`或者`tsx`，而他们又直接被`babel`支持所以此插件的本质是调用`babel` + `babel-plugin`。此插件并不依赖vue中的编译模块，而是把和vue编译相关的逻辑转移到了`babel-plugin`之中，*使用`babel`编译的模板中是不包含`patchFlags`优化属性的*
 ![image](https://origin.picgo.net/2025/09/11/imagef67a55dc820b0190.png)
+#### 通过`complier`模块和`tsx+babel`编译的区别
+
+|              | `complier`                                        | `tsx+babel`             |
+| ------------ | ------------------------------------------------- | ----------------------- |
+| 静态标识和静态提升    | 会标记出静态节点优化，优化diff算法                               | ❌                       |
+| `PatchFlags` | 会在render函数中加入PatchFlags参数，优化diff算法                | ❌                       |
+| `block tree` |                                                   |                         |
+| 性能影响         | 加入了许多优化diff算法的参数，所以提高了runtime时的性能，不过构建时候的市场也会响应增加 | runtime ☹️<br>build  😄 |
