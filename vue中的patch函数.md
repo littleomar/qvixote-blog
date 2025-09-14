@@ -28,7 +28,7 @@ const patch: PatchFn = (
   }
 
   const { type, ref, shapeFlag } = n2;
-  switch (type) {  // 处理不同类型VNode调用不同的函数
+  switch (type) {  // 根据VNodeTypes和shapeFlag确定调用那个process函数
     case Text:
       processText(n1, n2, container, anchor);
       break;
@@ -120,8 +120,10 @@ const patch: PatchFn = (
 };
 
 ```
-
 #### 处理不同的`VNode`类型
-
-##### `processText`处理Text节点
-vue在进行编译的过程中会将text节点编译为类型为
+##### 处理叶子`VNode`
+叶子节点为`VNode`树中的最小单元，即`VNodeTypes`为`Text`、`Comment`、`Static`这种不包含`children`的节点（此处的`Static`的`children`为静态所以可以直接把根节点看为叶子节点），这些节点不涉及diff算法
+##### 处理包含`children`的`VNode`
+像是`VNodeTypes`为`Fragment`，`ShapeFlags`为`ELEMENT`、`COMPONENT`、`TELEPORT`这种包含`children`的`VNode`需要进行diff算法对比出最优更新dom的方法
+#### `Diff`算法
+参考[vue-diff算法](https://www.tangyuxian.com/2021/07/14/前端/vue/vue-diff算法)
