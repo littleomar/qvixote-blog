@@ -94,7 +94,7 @@ export class ComputedRefImpl<T = any> implements Subscriber {
 export const toReactive = <T extends unknown>(value: T): T =>
   isObject(value) ? reactive(value) : value
 ```
-![image](https://origin.picgo.net/2025/09/06/imagea27a19c96d928ece.png)
+![image](https://image.855233.xyz/i/2026-05-06/a4505fd88bb9409abd573a1e43040525.png)
 ##### Reactive类
 **Reactive类**是将`Object`类型是数据变为响应式，其实现原理得益于**ES6**对对象拦截器`Proxy`的支持，`Proxy`会在`Object`之前加上一层代理。通过`Proxy`代理的对象是惰性的，只有在对象那的键值被访问时才会起作用
 ```typescript
@@ -257,7 +257,8 @@ export const arrayInstrumentations: Record<string | symbol, Function> = <any>{
   // ...
 }
 ```
-![image](https://origin.picgo.net/2025/09/06/imageec26e1e94152c91c.png)
+
+![image](https://image.855233.xyz/i/2026-05-06/116b4a3b694643eb93c0187b485fe176.png)
 #### 响应式运行机制
 上一节讲了`Dep`的定义和`Dep`主要负责的内容，**响应式运行机制**则是在合适的时机调用`Dep`内定义的方法，在vue中是通过effect完成的也就是监听者subscriber，vue中的effect所能调用的函数分为三种，`render`函数，`watch`函数和`computed`，是的这里也有`computed`，所以`computed`即是`ref`也是`effect`，每个`effect`都有2个核心的函数`fn`和`callback`，`fn`的主要作用是调用时进行**依赖收集**，`callback`则主要是**派发更新**时最终调用的执行函数
 ```typescript
@@ -410,4 +411,4 @@ export class ComputedRefImpl<T = any> implements Subscriber {
   // ...
 }
 ```
-![image](https://origin.picgo.net/2025/09/06/image56d8f42930c69d90.png)
+![image](https://image.855233.xyz/i/2026-05-06/8ace169f498b4ec69c1e6d597f6c8aba.png)

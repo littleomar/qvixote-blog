@@ -257,7 +257,7 @@ export function flushPostFlushCbs(seen?: CountMap): void {
 Vue3中的任务调度模块的设计思想和JS中的事件循环十分类似，抛开`flush === 'sync'`不说，因为同步执行也可以不算事件调度，那么我们就可以把`flush === 'pre'`也就是`effect`默认的模式，像是不加参数的`watch`和`render`函数诸如此类，可以比作JS中的微任务，而`flush === 'post'`看作是JS中的宏任务，不过这只是相对而言，并不是真正的宏任务&微任务，在清空`preJobs`队列过程中如果产生新的`preJob`则会插入到`queue`中按顺序执行，如果产生新的`postJob`则会等到`queue`队列清空完成后才开始执行，那么如果在清空`postJobs`的过程中产生新的`preJob`或者`postJob`会在此次`postJobs`（这个`postJobs`在遍历过程中是不会发生改变的）清空完成后，就会开启新一轮的`flushJobs`，注意`flushJobs`的伪事件循环都是在同一个微任务中运行的。参考宏任务&微任务再火焰图中的表现更容易理解[[浏览器运行原理、宏任务&微任务#JS执行|浏览器事件循环]]
 
 下图的宏任务&微任务可以替换成`preJob`和`postJob`，原理和执行顺序是一样的
-![image](https://origin.picgo.net/2025/09/08/imageaedfd40a90a8a825.png)
+![image](https://image.855233.xyz/i/2026-05-06/a1eb9e0e82674fcf8828c407aa337f31.png)
 ##### `nextTick`的原理
 理解完浏览器的事件循环和vue中的`preJob&postJob`那么`nextTick`的执行时机就很简单了
 ```ts

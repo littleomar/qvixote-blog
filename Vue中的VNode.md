@@ -385,7 +385,7 @@ export default defineComponent({
 });
 ```
 `App.tsx`经过`@vitejs/plugin-vue-jsx`插件处理后的前后变化如下
-![image](https://origin.picgo.net/2025/09/09/image0bf2e42db86f749e.png)
+![image](https://image.855233.xyz/i/2026-05-06/8ad8b49f038c472d842a8d4fbd0063cf.png)
 
 ```vue
 // App.vue
@@ -406,7 +406,7 @@ const handleClickDiv = () => {
 </script>
 ```
 经过`@vitejs/plugin-vue`处理后的结果如下
-![image](https://origin.picgo.net/2025/09/09/image97d6971b20f11191.png)
+![image](https://image.855233.xyz/i/2026-05-06/96277f56c3f747eab377891b057dac42.png)
 可以看出无论是SFC还是tsx都会被编译为一个能够返回代表组件虚拟dom树的函数
 
 #### 组件实例和VNode的关系

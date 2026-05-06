@@ -11,11 +11,11 @@
 #### 现代执行环境中GC的优化机制
 ##### 分代回收 Generational GC
 在**V8**引擎中实现，原理：[代际假说(Generational Hypothesis)](https://v8.dev/blog/trash-talk)。变量划分为两个部分，新生代和旧生代，新生代又把内存划分为两个半区，在进行垃圾回收时会将存活的变量复制到另一个半区，未被引用的变量直接丢弃，经过两次复制依然存活的变量则会提升到旧生代中，旧生代中的变量则会采用Mark-Sweep的机制进行GC。
-![image](https://origin.picgo.net/2025/09/01/image54230cfaa46d89b9.png)
+![image](https://image.855233.xyz/i/2026-05-06/45df8d10893947278c62e9a21ff7dfef.png)
 ##### 三色标记
 
 把对象分为白、灰、黑三种，在数据初始化的时候所有对象都是白色的，然后从根（全局变量、运行栈、闭包）中开始遍历，把可以直接访问的对象标记为灰色并把它放到一个待处理的队列中，下一步遍历上述队列中的灰色数据，如果子对象都可达则标记为黑色，如果子对象中有白色对象，则保持灰色不变，重复上述过程，直至没有灰色对象。标记阶段结束后开启回收机制，黑色对象为依然存活的对象，白色对象为无用对象则会被清理。借用wiki中的一张图：
-![Animation_of_tri-color_garbage_collection](https://origin.picgo.net/2025/09/01/Animation_of_tri-color_garbage_collection5730391962d204a9.gif)
+![Animation_of_tri-color_garbage_collection-2](https://image.855233.xyz/i/2026-05-06/9a4e509b3d254609b8dc515fae7d5feb.gif)
 ##### 其他
 - 增量标记：分段进行标记，GC 标记过程被拆分成多个小片段（约 5–10 ms），减少主线程的长时间占用。
 - 并行与并发：主线程 + 多线程 + 后台线程进行标记

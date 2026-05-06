@@ -117,7 +117,7 @@ function addSub(link: Link) {
 下图为在一个`effect`中引用三个不同`ref`的情形
 ![effect中的deps](https://origin.picgo.net/2025/09/06/effectdeps29ec3dedaba3af88.gif)
 下图为在一个多个`effect`中引用同一个`ref`的情形，包含`activeSub`的指向
-![Dep中的subs链表](https://origin.picgo.net/2025/09/07/Depsubs06fc23fd1bed173e.gif)
+![Dep中的subs链表](https://image.855233.xyz/i/2026-05-06/b9ad7d1316554ee6ad91e5db856908da.gif)
 `computed`也属于`ref`并且会会维护一个`dep`实例，因此也会使用`Dep.track()` -> `addSub`收集依赖
 
 #### 响应式`Object`调用的`track`

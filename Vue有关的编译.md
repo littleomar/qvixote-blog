@@ -77,7 +77,7 @@ export function finishComponentSetup(
   }
 }
 ```
-![image](https://origin.picgo.net/2025/09/09/imaged8780de6421f0007.png)
+![image](https://image.855233.xyz/i/2026-05-06/b32c593e7a6f450198e9aafa9ef52f3a.png)
 ##### parse
 这个过程主要调用开源的html解析工具[htmlparse2](https://github.com/fb55/htmlparser2/tree/masterhttps://github.com/fb55/htmlparser2/tree/master)，借用里边高效html解析工具将其解析为AST，不过这个AST只是初步解析并将`vue`相关的关键字用不同的`name`字段在AST节点中表示
 ```ts
@@ -375,7 +375,7 @@ export const transformText: NodeTransform = (node, context) => {
 这个插件是依赖vue编译模块的，会调用`vue/compiler-sfc`其实执行过程和`template`执行很类似，不过执行时机不同，插件是在静态资源构建时运行的，`template`模板则是在`runtime`时候执行
 #### `@vitejs/plugin-vue-jsx`插件处理
 这个插件就与前两者不同了，因为处理的文件是`jsx`或者`tsx`，而他们又直接被`babel`支持所以此插件的本质是调用`babel` + `babel-plugin`。此插件并不依赖vue中的编译模块，而是把和vue编译相关的逻辑转移到了`babel-plugin`之中，*使用`babel`编译的模板中是不包含`patchFlags`优化属性的*
-![image](https://origin.picgo.net/2025/09/11/imagef67a55dc820b0190.png)
+![image](https://image.855233.xyz/i/2026-05-06/5322df1bd6b341a9b76260bb2c05614b.png)
 #### 通过`complier`模块和`tsx+babel`编译的区别
 
 |              | `complier`                                        | `tsx+babel`             |

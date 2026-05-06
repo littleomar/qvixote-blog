@@ -70,7 +70,7 @@ export interface Subscriber extends DebuggerOptions {
 - **LinkNode** 分为两个部分**数据区域**和**指针区域**
 	- **数据区域** 包含`sub` `dep` `version` 三个部分
 	- **指针区域** 有`sub` `dep`两个链上的前后指针 `prevDep` `nextDep` `prevSub` `nextSub`
-![image](https://origin.picgo.net/2025/09/04/image3b595cba1bfd7409.png)
+![image](https://image.855233.xyz/i/2026-05-06/04869b5d78874852ad07d13f65ad4941.png)
 #### 判断是否为是同一个`LinkNode`
 假如在一个`LinkNode`节点中`sub`指向的subscriber和`dep`指向的dependence都一致，则此`LinkNode`确定为同一个
 #### `LinkNode`的创建
